@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import ButtonsPanel from './ButtonsPanel';
 import Display from './Display';
@@ -6,22 +6,15 @@ import Display from './Display';
 /**
  * The main component of the app, which contains all states and other smaller components
  */
-class Calculator extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            current: '',
-            answer: '',
-            operator: '',
-        };
-    }
-
+const Calculator = () => {
+    let [current, setCurrent] = useState('');
+    let [answer, setAnswer] = useState('');
+    let [operator, setOperator] = useState('');
+    
     /**
      * Handling decimal click
      */
-    handleDecimal = () => {
-        let { operator, current, answer } = this.state;
-
+    const handleDecimal = () => {
         // If there is no operator entered yet
         if (operator === '') {
             // When there is nothing entered yet, we interpret '.' as '0.'
@@ -54,7 +47,9 @@ class Calculator extends React.Component {
             current = current + '.';
         }
 
-        this.setState({ current, answer, operator });
+        setCurrent(current);
+        setAnswer(answer);
+        setOperator(operator);
     };
 
     /**
@@ -62,9 +57,8 @@ class Calculator extends React.Component {
      *
      * @param {String} event.target.value The number on the numpad
      */
-    handleNumpad = (event) => {
+    const handleNumpad = (event) => {
         let value = event.target.value;
-        let { current, answer, operator } = this.state;
 
         // Cannot add 0 to the beginning of a number
         if (value === '0' && current === '') return;
@@ -85,14 +79,15 @@ class Calculator extends React.Component {
             answer = '';
         }
 
-        this.setState({ current, answer, operator });
+        setCurrent(current);
+        setAnswer(answer);
+        setOperator(operator);
     };
 
     /**
      * Handling the "equals" button click
      */
-    handleEqual = () => {
-        let { answer, current, operator } = this.state;
+    const handleEqual = () => {
 
         // If nothing has been entered yet, we have nothing to evalutate
         if (current === '' && answer === '' && operator === '') return;
@@ -100,9 +95,7 @@ class Calculator extends React.Component {
             // If there is only one operand entered and there is no operators
             // entered yet, we simply take the operand as the answer.
             if (answer === '' && operator === '') {
-                this.setState({
-                    answer: current,
-                });
+                setAnswer(current);
             }
             // If there are no operands entered yet but there is a previous answered
             // we do nothing
@@ -117,7 +110,9 @@ class Calculator extends React.Component {
                 current = ans + '';
                 answer = ans + '';
                 operator = '';
-                this.setState({ current, answer, operator });
+                setCurrent(current);
+                setAnswer(answer);
+                setOperator(operator);
             }
         }
     };
@@ -125,12 +120,10 @@ class Calculator extends React.Component {
     /**
      * Handling the "All Clear" button click
      */
-    handleReset = () => {
-        this.setState({
-            current: '',
-            answer: '',
-            operator: '',
-        });
+    const handleReset = () => {
+        setCurrent('');
+        setAnswer('');
+        setOperator('');
     };
 
     /**
@@ -138,10 +131,9 @@ class Calculator extends React.Component {
      *
      * @param {String} event.target.value The operator that user has just inputted
      */
-    handleOperator = (event) => {
+    const handleOperator = (event) => {
         let opt = event.target.value;
         let operators = /\+|\/|\*|-/g;
-        let { current, answer, operator } = this.state;
 
         // We have a special treat for '-' sign since it can be both 'subtraction'
         // operator or 'negative' operator, therefore we have to check if the newly
@@ -151,19 +143,15 @@ class Calculator extends React.Component {
             if (current === '' && answer === '') return;
             // If the first operands has been entered
             else if (current !== '' && answer === '' && operator === '') {
-                this.setState({
-                    current: current + opt,
-                    operator: opt,
-                });
+                setCurrent(current + opt);
+                setOperator(opt);
             } else if (current !== '') {
                 // If the user just finished a calculation and want to use to previous answer
                 // to perform a new calculation
                 if (operator === '') {
-                    this.setState({
-                        current: current + opt,
-                        operator: opt,
-                        answer: '',
-                    });
+                    setCurrent(current + opt);
+                    setOperator(opt);
+                    setAnswer('');
                 }
                 // If the user wants to change the current operator
                 // replace all the old operators (including negative sign) and
@@ -172,7 +160,8 @@ class Calculator extends React.Component {
                     current = current.replace(operators, '');
                     current = current + opt;
                     operator = opt;
-                    this.setState({ current, operator });
+                    setCurrent(current);
+                    setOperator(operator);
                 }
                 // If the user wants to enter consecutives operators one after another
                 // (with the proper operands entered in between), we just evaluate
@@ -182,7 +171,8 @@ class Calculator extends React.Component {
                     current = ans + opt;
                     operator = opt;
 
-                    this.setState({ current, operator });
+                    setCurrent(current);
+                    setOperator(operator);
                 }
             }
         } else {
@@ -194,27 +184,28 @@ class Calculator extends React.Component {
             }
 
             current = current + opt;
-            this.setState({ current, operator, answer });
+
+            setCurrent(current);
+            setAnswer(answer);
+            setOperator(operator);
         }
     };
 
-    render() {
-        return (
-            <div id="calculator">
-                <Display
-                    current={this.state.current}
-                    answer={this.state.answer}
-                />
-                <ButtonsPanel
-                    handleEqual={this.handleEqual}
-                    handleReset={this.handleReset}
-                    handleNumpad={this.handleNumpad}
-                    handleOperator={this.handleOperator}
-                    handleDecimal={this.handleDecimal}
-                />
-            </div>
-        );
-    }
+    return (
+        <div id="calculator">
+            <Display
+                current={current}
+                answer={answer}
+            />
+            <ButtonsPanel
+                handleEqual={handleEqual}
+                handleReset={handleReset}
+                handleNumpad={handleNumpad}
+                handleOperator={handleOperator}
+                handleDecimal={handleDecimal}
+            />
+        </div>
+    );
 }
 
 export default Calculator;
